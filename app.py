@@ -3,7 +3,7 @@ import functions
 
 app = Flask('my_inst')
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def main_page():
     posts_data = functions.open_json('data/posts.json')
     comments_data = functions.open_json('data/comments.json')
@@ -16,7 +16,8 @@ def main_page():
 
     return render_template('index.html', posts=posts_data, bookmarks_quantity=bookmarks_quantity)
 
-@app.route('/post/<postid>')
+
+@app.route('/post/<postid>', methods=['GET'])
 def post_page(postid):
     post_data = functions.open_json('data/posts.json')
     comments_data = functions.open_json('data/comments.json')
@@ -37,5 +38,27 @@ def post_page(postid):
     # Рендрим пост
     return render_template('post.html', post=output_post, comments=output_comments, quantity=comments_quantity,
                            tags=tags)
+
+
+@app.route('/search/', methods=['GET'])
+def search_page():
+    posts_data = functions.open_json('data/posts.json')
+    comments_data = functions.open_json('data/comments.json')
+
+    # берем данные из аргумента 's'
+    s = request.args.get('s')
+    if s is None:
+        return 'Введите параметр для поиска'
+    s = s.lower()
+
+    # помещаем найденный пост в match(list)
+    match = functions.search_for_posts(posts_data, s)
+    # post - обновленный список post_data с указанием количества комментов
+    posts = functions.comments_count(match, comments_data)
+    if len(match):
+        quantity = len(match)
+        return render_template('search.html', post=posts, s=s, quantity=quantity)
+    return 'Ничего не найдено'
+
 
 app.run()

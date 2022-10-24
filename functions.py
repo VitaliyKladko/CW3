@@ -39,14 +39,9 @@ def get_comments_by_post_id(comment_data: list, post_id: int) -> list:
     """
     # все комменты к посту
     output_comments = []
-    is_exists = False
     for comment in comment_data:
         if post_id == comment['post_id']:
-            is_exists = True
             output_comments.append(comment)
-
-    if not is_exists:
-        raise ValueError
 
     return output_comments
 
