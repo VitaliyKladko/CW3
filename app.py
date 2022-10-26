@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, jsonify
 import functions
 
 app = Flask('my_inst')
@@ -55,10 +55,49 @@ def search_page():
     match = functions.search_for_posts(posts_data, s)
     # post - обновленный список post_data с указанием количества комментов
     posts = functions.comments_count(match, comments_data)
+    posts = functions.string_crop(posts)
     if len(match):
         quantity = len(match)
         return render_template('search.html', post=posts, s=s, quantity=quantity)
     return 'Ничего не найдено'
 
 
-app.run()
+@app.route('/users/<username>', methods=['GET'])
+def user_page(username):
+    posts_data = functions.open_json('data/posts.json')
+    comments_data = functions.open_json('data/comments.json')
+
+    # находим посты человека и колл-во комментариев к ним
+    math = functions.get_posts_by_user(posts_data, username)
+    posts = functions.comments_count(math, comments_data)
+    posts = functions.string_crop(posts)
+
+    return render_template('user-feed.html', posts=posts, name=username)
+
+
+@app.errorhandler(404)
+def resource_not_found(e):
+    return jsonify(error=str(e)), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return jsonify(error=str(e)), 500
+
+
+@app.route('/api/posts/')
+def json_all_posts():
+    posts_data = functions.open_json('data/posts.json')
+    return jsonify(posts_data)
+
+
+@app.route('/api/posts/<post_id>')
+def json_post(post_id):
+    posts_data = functions.open_json('data/posts.json')
+    post_num = int(post_id)
+    post = functions.get_post_by_pk(posts_data, post_num)
+    return jsonify(post)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
