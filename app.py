@@ -1,7 +1,14 @@
 from flask import Flask, request, render_template, jsonify
+import logging
 import functions
+from logger import logger_config
 
-app = Flask('my_inst')
+
+app = Flask(__name__)
+
+api_logger = logging.getLogger('api_logger')
+logger_config()
+
 
 @app.route('/', methods=['GET'])
 def main_page():
@@ -45,10 +52,11 @@ def search_page():
     posts_data = functions.open_json('data/posts.json')
     comments_data = functions.open_json('data/comments.json')
 
-    # берем данные из аргумента 's'
     s = request.args.get('s')
+
     if s is None:
-        return 'Введите параметр для поиска'
+        return 'Вы ничего не ввели'
+
     s = s.lower()
 
     # помещаем найденный пост в match(list)
@@ -88,6 +96,7 @@ def internal_server_error(e):
 @app.route('/api/posts/')
 def json_all_posts():
     posts_data = functions.open_json('data/posts.json')
+    api_logger.debug('Запрос /api/posts')
     return jsonify(posts_data)
 
 
@@ -96,6 +105,7 @@ def json_post(post_id):
     posts_data = functions.open_json('data/posts.json')
     post_num = int(post_id)
     post = functions.get_post_by_pk(posts_data, post_num)
+    api_logger.debug(f'Запрос /api/posts {post_id}')
     return jsonify(post)
 
 
