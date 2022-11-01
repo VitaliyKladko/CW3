@@ -105,7 +105,7 @@ def json_post(post_id):
     posts_data = functions.open_json('data/posts.json')
     post_num = int(post_id)
     post = functions.get_post_by_pk(posts_data, post_num)
-    api_logger.debug(f'Запрос /api/posts {post_id}')
+    api_logger.debug(f'Запрос /api/posts/{post_id}')
     return jsonify(post)
 
 

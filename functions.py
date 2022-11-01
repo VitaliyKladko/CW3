@@ -37,7 +37,6 @@ def get_comments_by_post_id(comment_data: list, post_id: int) -> list:
     :param post_id: номер поста (его ID) -> int
     :return: Список словарей
     """
-    # все комменты к посту
     output_comments = []
     for comment in comment_data:
         if post_id == comment['post_id']:
